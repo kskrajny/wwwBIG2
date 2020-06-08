@@ -1,0 +1,7 @@
+extends layout
+
+block content
+  h1= "Choose quiz to see its results"
+  - for(var i = 1; i <= len; i++) {
+    a(href="/res"+i) QUIZ #{i} 
+  - }

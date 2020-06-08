@@ -1,0 +1,40 @@
+{
+  "name": "apka",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "start": "node ./bin/www",
+    "build": "tsc --target es2015 public/javascript/main.ts",
+    "watch": "npm-watch"
+  },
+  "watch": {
+    "build": {
+      "patterns": [
+        "."
+      ],
+      "extensions": "ts"
+    }
+  },
+  "dependencies": {
+    "@types/jquery": "^3.3.38",
+    "blob": "^0.1.0",
+    "bluebird": "^3.7.2",
+    "connect": "^3.7.0",
+    "connect-sqlite3": "^0.9.11",
+    "cookie-parser": "~1.4.4",
+    "debug": "~2.6.9",
+    "express": "~4.16.1",
+    "express-session": "^1.17.1",
+    "http-errors": "^1.6.3",
+    "morgan": "~1.9.1",
+    "node-fetch": "^2.6.0",
+    "npm-watch": "^0.6.0",
+    "pug": "2.0.0-beta11",
+    "read-blob": "^1.1.0",
+    "sqlite3": "^4.2.0"
+  },
+  "devDependencies": {
+    "@types/sqlite3": "^3.1.6",
+    "ts-node": "^8.10.2"
+  }
+}

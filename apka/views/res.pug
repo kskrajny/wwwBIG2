@@ -1,0 +1,24 @@
+extends layout
+
+block content
+  h1= "QUIZ "+nr
+  h2= "Your results"
+  table
+    each x in strs
+      tr
+        td #{x}
+      tr
+  h2= "Top 3"
+  table
+    each x in top
+      tr
+        td #{x.login}
+        td #{x.result}
+      tr
+  h2= "Average time"
+  table
+    each x in avg
+      tr
+        td #{x.nr+1}.
+        td #{x.avg}sec
+      tr
