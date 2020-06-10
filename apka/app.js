@@ -84,9 +84,8 @@ app.get('/result', async function (req, res) {
     res.redirect('/login')
     return
   }  
-  const rows = await db.myQuery('SELECT COUNT(*) as count FROM intros')
-  let len = rows[0].count
-  res.render('result', {len : len})
+  const rows = await db.myQuery('SELECT testID FROM usersResult WHERE userID='+req.session.userID)
+  res.render('result', {tests : rows})
 })
 
 app.get('/res:quizID', async function (req, res) {
@@ -117,7 +116,11 @@ app.get('/login', function (req, res) {
 })
 
 app.get('/repass', function (req, res) {
-  res.render('repass')
+  if(req.session.logged !== true) {
+    res.redirect('/login');
+  } else {
+    res.render('repass')
+  }
 })
 
 app.get('/logout', function (req, res) {
@@ -173,20 +176,14 @@ app.post('/login', async function (req, res) {
 })
 
 app.post('/repass', async function (req, res) {
-  let login = req.body.login
+  let login = req.session.login
   let opassw = req.body.opassw
   let npassw = req.body.npassw
   let id = await handleUser(login, opassw, npassw)
   if(id === -1) {
     res.redirect('/?mess=Bad password')
   } else {
-    req.session.regenerate(function(err) {
-      req.session.userID = id
-      req.session.login = login
-      req.session.passw = npassw
-      req.session.logged = true
-      res.redirect('/?mess=Password changed')
-    })
+    res.redirect('/logout')
   }
 })
 
@@ -217,7 +214,6 @@ app.post('/quiz:quizID', async function (req, res) {
         json.penalty[i] = rows[i].penalty
         json.result += rows[i].penalty
       }
-      console.log(bol)
       await db.myRun('INSERT OR IGNORE INTO usersResponse \
         VALUES('+req.session.userID+', '+req.params.quizID+', '+i+', '+realTime[i]+', "'+bol+'")')
     }

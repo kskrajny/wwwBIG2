@@ -3,6 +3,9 @@ extends layout
 block content
     h1=str
     form(action="/login", id="login", method='POST')
+        p username
         input(type="text", name="login")
+        p password
         input(type="text", name="passw")
+        p
         input(type="submit", value="send")
