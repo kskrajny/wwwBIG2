@@ -36,18 +36,45 @@ db.myRun = function (sql) {
 
 var app = express()
 
-app.use(session({
-  store: new SQLiteStore,
+var ses = {
+  store: new SQLiteStore(),
   secret: 'vndfovnb',
   resave: false,
   saveUninitialized: false,
-}))
+};
+
+app.use(session(ses));
+
+
+ses.store.db.myQuery = function (sql, params) {
+  var that = this;
+  return new Promise(function (resolve, reject) {
+    that.all(sql, params, function (error, rows) {
+      if (error)
+        reject(error);
+      else
+        resolve(rows);
+    });
+  });
+};
+
+ses.store.db.myRun = function (sql) {
+  var that = this;
+  return new Promise(function (resolve, reject) {
+    that.run(sql, function (error) {
+      if (error)
+        reject(error);
+      else
+        resolve();
+    });
+  });
+};
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'pug');
 
-app.get('/', (req, res) => {
+app.get('/', async (req, res) => {
   res.render('index', {message: req.query.mess})
 })
 
@@ -183,6 +210,13 @@ app.post('/repass', async function (req, res) {
   if(id === -1) {
     res.redirect('/?mess=Bad password')
   } else {
+    const rows = await ses.store.db.myQuery('SELECT * FROM sessions')
+    rows.forEach(async (x) => {
+      let y = JSON.parse(x.sess)
+      if(y.userID === req.session.userID) {
+        await ses.store.db.myRun('DELETE FROM sessions WHERE sid="'+x.sid+'"');
+      }
+    });
     res.redirect('/logout')
   }
 })

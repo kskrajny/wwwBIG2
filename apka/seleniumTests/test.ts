@@ -1,60 +1,60 @@
-import { expect } from "chai";
-import "mocha";
-const fetch = require("node-fetch");
+import {Builder, Capabilities, WebDriver, Session} from 'selenium-webdriver';
+import { expect } from 'chai';
+import { driver } from 'mocha-webdriver';
+import { By } from 'selenium-webdriver';
 
-describe("Twice", () => {
+describe('Test2', function () {
 
-    it("cant take test twice", async () => {
-        /* variable to check if it is OK */
-        let code = 10000
-        /* set values of session etc */
-        let body0 = {
-            login: 'AAAAAAAAAAAAAAAAAA',
-            passw: 'AAAAAAAAAAAAAAAAAAA'
-        }
-        let  body1 = {
-            answer: [ '1', '1', '1', '1' ],
-            stats: [ '25%', '25%', '25%', '25%' ],
-            startTime: new Date()
-          }
+    it('log out after password change', async function() {
+        this.timeout(50000)
 
-        await fetch('https://localhost:3000/login', {
-            method: 'POST',
-            body: JSON.stringify(body0)
-        }).then((res) => {
-            console.log(res)
-        })
+        /* log in as user1 */
+        await driver.get('http://localhost:3000/login');
+        await driver.find('input[name=login]').sendKeys('user1');
+        await driver.find('input[name=passw]').sendKeys('user1');
+        await driver.find('input[type=submit]').doClick();
+        let url = await driver.getCurrentUrl();
+        expect(url).to.equal('http://localhost:3000/login')
+        let log = await driver.findElement(By.tagName('h1')).getText() 
+        expect(log).to.not.equal('Not logged')
 
-        /* save results of user with id 117809 with POST,
-           normal user cant send POST without taking the test*/
-        await fetch('http://localhost:3000/quiz1', {
-            method: 'POST',
-            body: JSON.stringify(body1)
-        }).then((res) => {
-            console.log(res)
-        })
+        /* log in as user1 again using other session*/
+        const driver1 = await new Builder().forBrowser('firefox').build();
 
-        /* Try take quiz again GET */
-        await fetch('http://localhost:3000/quiz1')
-        .then(res => {
-            console.log(res.url)
-            code = (res.url === '/?mess=You have already solved this quiz') ? 0 : -1
-        })
+        await driver1.get('http://localhost:3000/login');
+        await driver1.find('input[name=login]').sendKeys('user1');
+        await driver1.find('input[name=passw]').sendKeys('user1');
+        await driver1.find('input[type=submit]').doClick();
+        url = await driver1.getCurrentUrl();
+        expect(url).to.equal('http://localhost:3000/login')
 
-        expect(code).to.equal(0);
+        /* change password */
+        await driver1.get('http://localhost:3000/repass');
+        await driver1.find('input[name=opassw]').sendKeys('user1');
+        await driver1.find('input[name=npassw]').sendKeys('newpassw');
+        await driver1.find('input[type=submit]').doClick();
+        url = await driver1.getCurrentUrl();
+        expect(url).to.equal('http://localhost:3000/logout')
+        await driver1.quit()
+
+        await driver.sleep(2000)
+
+        /* driver should be logged out */
+        await driver.get('http://localhost:3000/');
+        await driver.get('http://localhost:3000/login');
+        await driver.sleep(1000);
+        log = await driver.findElement(By.tagName('h1')).getText() 
+        expect(log).to.equal('Not logged')
+    
+        /* log in as user1 and save previous password */
+        await driver.get('http://localhost:3000/login');
+        await driver.find('input[name=login]').sendKeys('user1');
+        await driver.find('input[name=passw]').sendKeys('newpassw');
+        await driver.find('input[type=submit]').doClick();
+        await driver.get('http://localhost:3000/repass');
+        await driver.find('input[name=opassw]').sendKeys('newpassw');
+        await driver.find('input[name=npassw]').sendKeys('user1');
+        await driver.find('input[type=submit]').doClick();
     });
-/*
-    it("can take test for the first time", async () => {
-        let code = 0
-        await fetch('http://localhost:3000/quiz1')
-        .then(res => {
-            console.log(res.url)
-            code = (res.url === 'http://localhost:3000/login') ? 0 : 1
-        })
-        .catch(err => {
-            code = err
-        })
-        expect(code).to.equal(0);
-    });
-*/
-});
+
+})
