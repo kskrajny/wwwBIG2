@@ -27,7 +27,7 @@
     "express-session": "^1.17.1",
     "http-errors": "^1.6.3",
     "morgan": "~1.9.1",
-    "node-fetch": "^2.6.0",
+    "node-fetch": "^2.6.1",
     "npm-watch": "^0.6.0",
     "pug": "2.0.0-beta11",
     "read-blob": "^1.1.0",
